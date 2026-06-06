@@ -101,44 +101,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
  // 6. Handle Site Visit Form Submission (Formspree)
-    const visitForm = document.getElementById('visitForm');
-    if (visitForm) {
-        visitForm.addEventListener('submit', async function(e) {
-            e.preventDefault(); // Stop page redirect
-            
-            const submitBtn = visitForm.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = "Sending...";
-            submitBtn.disabled = true;
-
-            try {
-                const response = await fetch(visitForm.action, {
-                    method: 'POST',
-                    body: new FormData(visitForm),
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    // Success! Hide form and show green box
-                    visitForm.style.display = 'none';
-                    const successMsg = document.getElementById('successMessage');
-                    if (successMsg) {
-                        successMsg.classList.remove('hidden');
-                    }
-                } else {
-                    alert("Oops! There was a problem submitting your form.");
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
-                }
-            } catch (error) {
-                alert("Oops! Check your internet connection and try again.");
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-            }
-        });
-    }
+    
 
 // 7. Custom Image Carousel Logic
     const track = document.getElementById('carouselTrack');
