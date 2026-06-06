@@ -100,18 +100,119 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // 6. Handle Site Visit Form Submission
+    // 6. Handle Site Visit Form Submission (Background Sending)
     const visitForm = document.getElementById('visitForm');
     if (visitForm) {
         visitForm.addEventListener('submit', function(e) {
-            e.preventDefault(); 
+            e.preventDefault(); // Stop the page from redirecting
             
-            // Hide form and show success message
-            this.style.display = 'none';
-            const successMsg = document.getElementById('successMessage');
-            if (successMsg) {
-                successMsg.classList.remove('hidden');
-            }
+            // Get the form data and the URL to send it to
+            const formData = new FormData(visitForm);
+            const actionUrl = visitForm.getAttribute('action');
+            
+            // Change button text to show it's working
+            const submitBtn = visitForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = "Sending...";
+            submitBtn.disabled = true;
+
+            // Send data in the background using Fetch API
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json' // Tells FormSubmit we are using AJAX
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Hide form and show success message
+                    visitForm.style.display = 'none';
+                    const successMsg = document.getElementById('successMessage');
+                    if (successMsg) {
+                        successMsg.classList.remove('hidden');
+                    }
+                } else {
+                    alert("Oops! There was a problem submitting your form. Please try again.");
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                alert("Oops! There was a problem submitting your form. Please check your internet connection.");
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            });
         });
     }
 });
+
+// 7. Custom Image Carousel Logic
+    const track = document.getElementById('carouselTrack');
+    const prevBtn = document.getElementById('prevSlide');
+    const nextBtn = document.getElementById('nextSlide');
+    const dotsContainer = document.getElementById('carouselDots');
+    
+    if (track && prevBtn && nextBtn && dotsContainer) {
+        const slides = Array.from(track.children);
+        const dots = Array.from(dotsContainer.children);
+        let currentIndex = 0;
+        let slideInterval;
+
+        function updateCarousel(index) {
+            // Slide the track
+            track.style.transform = `translateX(-${index * 100}%)`;
+            
+            // Update the dots to highlight the active one
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-premiumGold transition-all duration-300 transform scale-125 cursor-pointer shadow-[0_0_8px_#D4AF37]";
+                } else {
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-white/40 hover:bg-white/80 transition-all duration-300 cursor-pointer";
+                }
+            });
+            currentIndex = index;
+        }
+
+        function nextSlide() {
+            let nextIndex = (currentIndex + 1) % slides.length;
+            updateCarousel(nextIndex);
+        }
+
+        function prevSlide() {
+            let prevIndex = (currentIndex - 1 + slides.length) % slides.length;
+            updateCarousel(prevIndex);
+        }
+
+        // Click events for arrows
+        nextBtn.addEventListener('click', () => {
+            nextSlide();
+            resetInterval(); // Stop auto-sliding temporarily when user interacts
+        });
+        
+        prevBtn.addEventListener('click', () => {
+            prevSlide();
+            resetInterval();
+        });
+
+        // Click events for the dots
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                updateCarousel(index);
+                resetInterval();
+            });
+        });
+
+        // Auto slide every 4 seconds
+        function startInterval() {
+            slideInterval = setInterval(nextSlide, 4000);
+        }
+
+        function resetInterval() {
+            clearInterval(slideInterval);
+            startInterval();
+        }
+
+        // Start the carousel immediately
+        startInterval();
+    }
